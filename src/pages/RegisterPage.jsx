@@ -96,7 +96,7 @@ function RegisterPage() {
 
           <InputForm
             name="confirmPassword"
-            placeholder="confirmPassword"
+            placeholder="confirm password"
             handleChange={handleChange}
             error={inputError.confirmPassword}
             value={input.confirmPassword}
