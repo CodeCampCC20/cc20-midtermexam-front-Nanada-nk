@@ -24,17 +24,21 @@ const initialInput = {
 function ToDoPage() {
   const actionFetchTodo = useTodoStore((state) => state.actionFetchTodo);
 
-  useEffect(() => {
-    actionFetchTodo(userId);
-  }, []);
+  const isLoading = useTodoStore((state) => state.isLoading);
+  const loading = useTodoStore((state) => state.loading);
+  const done = useTodoStore((state) => state.done);
 
   const [input, setInput] = useState(initialInput);
   const [inputError, setInputError] = useState(initialInput);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
   const userId = useAuthStore((state) => state.userId);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    actionFetchTodo(userId);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,9 +48,9 @@ function ToDoPage() {
 
   const handleSubmit = async (e) => {
     try {
-      e.preventDefault(e);
-      setIsLoading(true);
-
+      e.preventDefault();
+      // setIsLoading(true);
+      loading;
       //validate
       schemaTodo.validateSync(input, { abortEarly: false });
       console.log("userId Todo", userId);
@@ -73,7 +77,7 @@ function ToDoPage() {
         setInputError(err);
       }
     } finally {
-      setIsLoading(false);
+      done;
     }
   };
 
@@ -93,9 +97,7 @@ function ToDoPage() {
                 <Rocket className="w-5 h-5 text-pink-500" />
               </div>
 
-              <form
-                onSubmit={handleSubmit}
-                >
+              <form onSubmit={handleSubmit}>
                 <InputForm
                   name="taskName"
                   placeholder="new task"
@@ -107,12 +109,13 @@ function ToDoPage() {
               </form>
               <hr className="border border-pink-800 m-4" />
               <ShowTodoDelete />
-              <button onClick={()=>navigate("/")} 
-              className="bg-pink-50 rounded-2xl w-full text-sm p-2 flex justify-center items-center gap-2 font-bold hover:bg-pink-300 cursor-pointer"> 
-                <LogOut className="w-5 h-5 text-pink-500" strokeWidth={2.5} /> 
-                LOGOUT</button>
+              <button
+                onClick={() => navigate("/")}
+                className="bg-pink-50 rounded-2xl w-full text-sm p-2 flex justify-center items-center gap-2 font-bold hover:bg-pink-300 cursor-pointer">
+                <LogOut className="w-5 h-5 text-pink-500" strokeWidth={2.5} />
+                LOGOUT
+              </button>
             </div>
-            
           </div>
         </>
       )}
