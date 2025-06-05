@@ -78,7 +78,7 @@ function RegisterPage() {
         <form onSubmit={handleSubmit} className="space-y-4 pl-2">
           <InputForm
             name="username"
-            placeholder="email"
+            placeholder="username"
             handleChange={handleChange}
             error={inputError.username}
             value={input.username}
