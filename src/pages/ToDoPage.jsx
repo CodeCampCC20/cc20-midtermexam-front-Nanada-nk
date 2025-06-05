@@ -12,30 +12,29 @@ import todoApi from "../api/todoApi";
 import useAuthStore from "../stores/authStore";
 import useTodoStore from "../stores/todoStore";
 import { useEffect } from "react";
-import { X } from "lucide-react";
-import { Settings } from "lucide-react";
-import { SaveIcon } from "lucide-react";
+import ShowTodoDelete from "../components/ShowTodoDelete";
+import { useNavigate } from "react-router";
+import { LogOut } from "lucide-react";
 
 const initialInput = {
   taskName: "",
-  completed:false,
   userId: 14,
 };
 
 function ToDoPage() {
-  const [input, setInput] = useState(initialInput);
-  const [inputError, setInputError] = useState(initialInput);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isEdit, setIsEdit] = useState(null);
-
-  const userId = useAuthStore((state) => state.userId);
-
-  const todoLists = useTodoStore((state) => state.todoLists);
   const actionFetchTodo = useTodoStore((state) => state.actionFetchTodo);
 
   useEffect(() => {
     actionFetchTodo(userId);
   }, []);
+
+  const [input, setInput] = useState(initialInput);
+  const [inputError, setInputError] = useState(initialInput);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const userId = useAuthStore((state) => state.userId);
+
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -78,92 +77,25 @@ function ToDoPage() {
     }
   };
 
-  const handleDelete = async (id) => {
-    try {
-      console.log("id handleDelete TodoPage", id);
-      await todoApi.deleteTodo(id);
-      await actionFetchTodo(id);
-
-      toast.success("Delete success!!");
-    } catch (error) {
-      console.log("Todo Delete error", error);
-      toast.error("Delete invalid!!");
-    }
-  };
-
-  const handleClickSave = async (id) => {
-    try {
-      // validate
-      schemaTodo.validateSync(input, { abortEarly: false });
-      console.log("userId handleClicksave",userId)
-      console.log("input handleClicksave",input)
-
-      //api
-      await todoApi.updateTodo(userId,id,input);
-      await actionFetchTodo(userId,id);
-      setIsEdit(null);
-
-      //alert
-      toast.success("Edit success!!");
-    } catch (error) {
-      console.log("handleClickSave error", error);
-      toast.error("Edit invalid");
-
-      if (error instanceof Yup.ValidationError) {
-        const err = error.inner.reduce((acc, cur) => {
-          acc[cur.path] = cur.message;
-          return acc;
-        }, {});
-        setInputError(err);
-      }
-    }
-  };
-
   return (
-    <div className="p-8">
-      <div className="mx-auto w-2/4 border border-pink-600 rounded-3xl p-8">
-        <div className="flex items-center justify-between">
-          <h1 className="mb-2">My Todo</h1>
-          <Rocket className="w-5 h-5 text-pink-500" />
+    <>
+      {isLoading ? (
+        <div className="flex items-center justify-center gap-4">
+          <LoaderCircle className="w-5 h-5 animate-spin" strokeWidth={2.5} />
+          <span className="text-pink-500 font-bold text-2xl">LOADING ...</span>
         </div>
+      ) : (
+        <>
+          <div className="space-y-2">
+            <div className="mx-auto w-2/4 border border-pink-600 rounded-3xl p-8">
+              <div className="flex items-center justify-between">
+                <h1 className="mb-2">My Todo</h1>
+                <Rocket className="w-5 h-5 text-pink-500" />
+              </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4 pl-2 flex justify-between gap-1">
-          <InputForm
-            name="taskName"
-            placeholder="new task"
-            handleChange={handleChange}
-            error={inputError.taskName}
-            value={input.taskName}
-            type="text"
-          />
-
-          <button
-            disabled={isLoading}
-            className="bg-pink-200 rounded-2xl hover:bg-pink-400 py-2 px-3 mb-4 duration-300 cursor-pointer">
-            {isLoading ? (
-              <>
-                <LoaderCircle
-                  className="w-5 h-5 animate-spin"
-                  strokeWidth={2.5}
-                />
-                <span>LOADING ...</span>
-              </>
-            ) : (
-              <>
-                <Send className="w-5 h-5" strokeWidth={2.5} />
-              </>
-            )}
-          </button>
-        </form>
-        <hr className="border border-pink-800 mb-4" />
-        {todoLists.map((item) => (
-          <div
-            className="flex items-center gap-2 bg-pink-100 rounded-2xl w-full p-2 mb-2"
-            key={item?.id}>
-            {isEdit === item.id ? (
-              <>
+              <form
+                onSubmit={handleSubmit}
+                >
                 <InputForm
                   name="taskName"
                   placeholder="new task"
@@ -172,43 +104,19 @@ function ToDoPage() {
                   value={input.taskName}
                   type="text"
                 />
-              </>
-            ) : (
-              <>
-                <input type="checkbox" />
-
-                <p className="w-full">{item?.taskName}</p>
-              </>
-            )}
-
-            {isEdit === item.id ? (
-              <>
-                <button onClick={() => handleClickSave(item.id)}>
-                  <SaveIcon className="h-4 w-4 cursor-pointer text-pink-700" />{" "}
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => {
-                    setIsEdit(item.id);
-                    setInput({
-                      id: item.id,
-                      taskName: item.taskName,
-                    });
-                  }}>
-                  <Settings className="h-4 w-4 cursor-pointer text-pink-700" />{" "}
-                </button>
-              </>
-            )}
-
-            <button onClick={() => handleDelete(item.id)}>
-              <X className="h-4 w-4 cursor-pointer text-pink-700" />{" "}
-            </button>
+              </form>
+              <hr className="border border-pink-800 m-4" />
+              <ShowTodoDelete />
+              <button onClick={()=>navigate("/")} 
+              className="bg-pink-50 rounded-2xl w-full text-sm p-2 flex justify-center items-center gap-2 font-bold hover:bg-pink-300 cursor-pointer"> 
+                <LogOut className="w-5 h-5 text-pink-500" strokeWidth={2.5} /> 
+                LOGOUT</button>
+            </div>
+            
           </div>
-        ))}
-      </div>
-    </div>
+        </>
+      )}
+    </>
   );
 }
 

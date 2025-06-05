@@ -16,11 +16,11 @@ todoApi.deleteTodo = (id) => {
   return axios.delete(`${BASEURL}/api/V1/todos/${id}/14`)
 }
 
-todoApi.updateTodo = (userId,id,input) => {
+todoApi.updateTodo = (id,userId,input) => {
   console.log('userId', userId)
   console.log('id', id)
   console.log('input', input)
-  return axios.patch(`${BASEURL}/api/V1/todos/${id}/14`,input)
+  return axios.patch(`${BASEURL}/api/V1/todos/${id}/${userId}`,input)
 }
 
 export default todoApi
